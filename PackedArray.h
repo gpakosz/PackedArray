@@ -51,4 +51,7 @@ void PackedArray_destroy(PackedArray* a);
 void PackedArray_pack(PackedArray* a, const uint32_t offset, const uint32_t* in, uint32_t count);
 void PackedArray_unpack(const PackedArray* a, const uint32_t offset, uint32_t* out, uint32_t count);
 
+// serialization helpers
+uint32_t PackedArray_bufferSize(const PackedArray* a);
+
 #endif // #ifndef PACKEDARRAY_H
