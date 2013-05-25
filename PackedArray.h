@@ -51,6 +51,10 @@ void PackedArray_destroy(PackedArray* a);
 void PackedArray_pack(PackedArray* a, const uint32_t offset, const uint32_t* in, uint32_t count);
 void PackedArray_unpack(const PackedArray* a, const uint32_t offset, uint32_t* out, uint32_t count);
 
+// single item access
+void PackedArray_set(PackedArray* a, const uint32_t offset, const uint32_t in);
+uint32_t PackedArray_get(const PackedArray* a, const uint32_t offset);
+
 // serialization helpers
 uint32_t PackedArray_bufferSize(const PackedArray* a);
 

@@ -482,6 +482,82 @@ void PackedArray_unpack(const PackedArray* a, const uint32_t offset, uint32_t* o
   }
 }
 
+void PackedArray_set(PackedArray* a, const uint32_t offset, const uint32_t in)
+{
+  uint32_t* __restrict out;
+  uint32_t bitsPerItem;
+  uint32_t startBit;
+  uint32_t bitsAvailable;
+  uint32_t mask;
+
+  assert(a != NULL);
+
+  bitsPerItem = a->bitsPerItem;
+
+  out = &a->buffer[((uint64_t)offset * (uint64_t)bitsPerItem) / 32];
+  startBit = ((uint64_t)offset * (uint64_t)bitsPerItem) % 32;
+
+  bitsAvailable = 32 - startBit;
+
+  mask = (uint32_t)(1ULL << bitsPerItem) - 1;
+  assert(0 == (~mask & in));
+
+  if (bitsPerItem <= bitsAvailable)
+  {
+    out[0] = (out[0] & ~(mask << startBit)) | (in << startBit);
+  }
+  else
+  {
+    // value spans 2 buffer cells
+    uint32_t low, high;
+
+    low = in << startBit;
+    high = in >> bitsAvailable;
+
+    out[0] = (out[0] & ~(mask << startBit)) | low;
+
+    out[1] = (out[1] & ~(mask >> (32 - startBit))) | high;
+  }
+}
+
+uint32_t PackedArray_get(const PackedArray* a, const uint32_t offset)
+{
+  const uint32_t* __restrict in;
+  uint32_t bitsPerItem;
+  uint32_t startBit;
+  uint32_t bitsAvailable;
+  uint32_t mask;
+  uint32_t out;
+
+  assert(a != NULL);
+
+  bitsPerItem = a->bitsPerItem;
+
+  in = &a->buffer[((uint64_t)offset * (uint64_t)bitsPerItem) / 32];
+  startBit = ((uint64_t)offset * (uint64_t)bitsPerItem) % 32;
+
+  bitsAvailable = 32 - startBit;
+
+  mask = (uint32_t)(1ULL << bitsPerItem) - 1;
+
+  if (bitsPerItem <= bitsAvailable)
+  {
+    out = (in[0] >> startBit) & mask;
+  }
+  else
+  {
+    // out spans 2 buffer cells
+    uint32_t low, high;
+
+    low = in[0] >> startBit;
+    high = in[1] << (32 - startBit);
+
+    out = low ^ ((low ^ high) & (mask >> bitsAvailable << bitsAvailable));
+  }
+
+  return out;
+}
+
 uint32_t PackedArray_bufferSize(const PackedArray* a)
 {
   assert(a != NULL);
@@ -673,9 +749,14 @@ int main(void)
         PackedArray_pack_reference(a2, i, &v1, 1);
         assert(memcmp(a1->buffer, a2->buffer, sizeof(a1->buffer[0]) * PackedArray_bufferSize(a1)) == 0);
 
+        PackedArray_set(a1, i, v1);
+        assert(memcmp(a1->buffer, a2->buffer, sizeof(a1->buffer[0]) * PackedArray_bufferSize(a1)) == 0);
+
         PackedArray_unpack(a1, i, &v2, 1);
         assert(v1 == v2);
         PackedArray_unpack_reference(a2, i, &v2, 1);
+        assert(v1 == v2);
+        v2 = PackedArray_get(a2, i);
         assert(v1 == v2);
       }
 
@@ -689,9 +770,14 @@ int main(void)
         PackedArray_pack_reference(a2, i, &v1, 1);
         assert(memcmp(a1->buffer, a2->buffer, sizeof(a1->buffer[0]) * PackedArray_bufferSize(a1)) == 0);
 
+        PackedArray_set(a1, i, v1);
+        assert(memcmp(a1->buffer, a2->buffer, sizeof(a1->buffer[0]) * PackedArray_bufferSize(a1)) == 0);
+
         PackedArray_unpack(a1, i, &v2, 1);
         assert(v1 == v2);
         PackedArray_unpack_reference(a2, i, &v2, 1);
+        assert(v1 == v2);
+        v2 = PackedArray_get(a2, i);
         assert(v1 == v2);
       }
 
