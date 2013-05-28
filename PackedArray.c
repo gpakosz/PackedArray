@@ -232,7 +232,7 @@ void PACKEDARRAY_JOIN(__PackedArray_pack_, PACKEDARRAY_IMPL_BITS_PER_ITEM)(uint3
       break;
 #include PACKEDARRAY_SELF
   }
-  assert(in == end);
+  PACKEDARRAY_ASSERT(in == end);
   if ((count * PACKEDARRAY_IMPL_BITS_PER_ITEM + startBit) % 32)
   {
     packed |= *out & ~((uint32_t)(1ULL << ((((uint64_t)count * (uint64_t)PACKEDARRAY_IMPL_BITS_PER_ITEM + startBit - 1) % 32) + 1)) - 1);
@@ -281,7 +281,7 @@ void PACKEDARRAY_JOIN(__PackedArray_unpack_, PACKEDARRAY_IMPL_BITS_PER_ITEM)(con
       break;
 #include PACKEDARRAY_SELF
   }
-  assert(out == end);
+  PACKEDARRAY_ASSERT(out == end);
 }
 
 #undef PACKEDARRAY_IMPL_BITS_PER_ITEM
@@ -295,8 +295,10 @@ void PACKEDARRAY_JOIN(__PackedArray_unpack_, PACKEDARRAY_IMPL_BITS_PER_ITEM)(con
 
 #include "PackedArray.h"
 
+#if !defined(PACKEDARRAY_ASSERT)
 #include <assert.h>
-#include <stdlib.h>
+#define PACKEDARRAY_ASSERT(expression) assert(expression)
+#endif
 
 #define PACKEDARRAY_IMPL
 #define PACKEDARRAY_IMPL_BITS_PER_ITEM 1
@@ -366,21 +368,30 @@ void PACKEDARRAY_JOIN(__PackedArray_unpack_, PACKEDARRAY_IMPL_BITS_PER_ITEM)(con
 #undef PACKEDARRAY_IMPL
 
 
-#include "PackedArray.h"
-
-#include <assert.h>
+#if !defined(PACKEDARRAY_MALLOC) || !defined(PACKEDARRAY_FREE)
 #include <stdlib.h>
+#endif
+
+#if !defined(PACKEDARRAY_MALLOC)
+#define PACKEDARRAY_MALLOC(size) malloc(size)
+#endif
+
+#if !defined(PACKEDARRAY_FREE)
+#define PACKEDARRAY_FREE(p) free(p)
+#endif
+
+#include <stddef.h>
 
 PackedArray* PackedArray_create(uint32_t bitsPerItem, uint32_t count)
 {
   PackedArray* a;
   size_t bufferSize;
 
-  assert(bitsPerItem > 0);
-  assert(bitsPerItem <= 32);
+  PACKEDARRAY_ASSERT(bitsPerItem > 0);
+  PACKEDARRAY_ASSERT(bitsPerItem <= 32);
 
   bufferSize = sizeof(uint32_t) * (((uint64_t)bitsPerItem * (uint64_t)count + 31) / 32);
-  a = malloc(sizeof(PackedArray) + bufferSize);
+  a = PACKEDARRAY_MALLOC(sizeof(PackedArray) + bufferSize);
 
   if (a != NULL)
   {
@@ -394,14 +405,14 @@ PackedArray* PackedArray_create(uint32_t bitsPerItem, uint32_t count)
 
 void PackedArray_destroy(PackedArray* a)
 {
-  assert(a != NULL);
-  free(a);
+  PACKEDARRAY_ASSERT(a);
+  PACKEDARRAY_FREE(a);
 }
 
 void PackedArray_pack(PackedArray* a, const uint32_t offset, const uint32_t* in, uint32_t count)
 {
-  assert(a != NULL);
-  assert(in != NULL);
+  PACKEDARRAY_ASSERT(a != NULL);
+  PACKEDARRAY_ASSERT(in != NULL);
 
   switch (a->bitsPerItem)
   {
@@ -442,8 +453,8 @@ void PackedArray_pack(PackedArray* a, const uint32_t offset, const uint32_t* in,
 
 void PackedArray_unpack(const PackedArray* a, const uint32_t offset, uint32_t* out, uint32_t count)
 {
-  assert(a != NULL);
-  assert(out != NULL);
+  PACKEDARRAY_ASSERT(a != NULL);
+  PACKEDARRAY_ASSERT(out != NULL);
 
   switch (a->bitsPerItem)
   {
@@ -490,7 +501,7 @@ void PackedArray_set(PackedArray* a, const uint32_t offset, const uint32_t in)
   uint32_t bitsAvailable;
   uint32_t mask;
 
-  assert(a != NULL);
+  PACKEDARRAY_ASSERT(a != NULL);
 
   bitsPerItem = a->bitsPerItem;
 
@@ -500,7 +511,7 @@ void PackedArray_set(PackedArray* a, const uint32_t offset, const uint32_t in)
   bitsAvailable = 32 - startBit;
 
   mask = (uint32_t)(1ULL << bitsPerItem) - 1;
-  assert(0 == (~mask & in));
+  PACKEDARRAY_ASSERT(0 == (~mask & in));
 
   if (bitsPerItem <= bitsAvailable)
   {
@@ -529,7 +540,7 @@ uint32_t PackedArray_get(const PackedArray* a, const uint32_t offset)
   uint32_t mask;
   uint32_t out;
 
-  assert(a != NULL);
+  PACKEDARRAY_ASSERT(a != NULL);
 
   bitsPerItem = a->bitsPerItem;
 
@@ -560,7 +571,7 @@ uint32_t PackedArray_get(const PackedArray* a, const uint32_t offset)
 
 uint32_t PackedArray_bufferSize(const PackedArray* a)
 {
-  assert(a != NULL);
+  PACKEDARRAY_ASSERT(a != NULL);
   return (uint32_t)(((uint64_t)a->bitsPerItem * (uint64_t)a->count + 31) / 32);
 }
 
