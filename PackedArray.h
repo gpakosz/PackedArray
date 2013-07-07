@@ -1,6 +1,10 @@
 #ifndef PACKEDARRAY_H
 #define PACKEDARRAY_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 
 /*
@@ -57,5 +61,9 @@ uint32_t PackedArray_get(const PackedArray* a, const uint32_t offset);
 
 // serialization helpers
 uint32_t PackedArray_bufferSize(const PackedArray* a);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // #ifndef PACKEDARRAY_H

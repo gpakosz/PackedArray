@@ -391,7 +391,7 @@ PackedArray* PackedArray_create(uint32_t bitsPerItem, uint32_t count)
   PACKEDARRAY_ASSERT(bitsPerItem <= 32);
 
   bufferSize = sizeof(uint32_t) * (((uint64_t)bitsPerItem * (uint64_t)count + 31) / 32);
-  a = PACKEDARRAY_MALLOC(sizeof(PackedArray) + bufferSize);
+  a = (PackedArray*)PACKEDARRAY_MALLOC(sizeof(PackedArray) + bufferSize);
 
   if (a != NULL)
   {
@@ -813,9 +813,9 @@ int main(void)
       PackedArray* a2;
       int i, j;
 
-      v1 = malloc(sizeof(uint32_t) * count);
+      v1 = (uint32_t*)malloc(sizeof(uint32_t) * count);
       assert(v1 != NULL);
-      v2 = malloc(sizeof(uint32_t) * count);
+      v2 = (uint32_t*)malloc(sizeof(uint32_t) * count);
       assert(v2 != NULL);
 
       a1 = PackedArray_create(bitsPerItem, count);
@@ -968,12 +968,12 @@ int main(void)
 
   printf("-- PackedArray self bench ------------------------------------------------------\n");
 
-  b1 = malloc(sizeof(uint32_t) * MAX_ELEMENT_COUNT);
+  b1 = (uint32_t*)malloc(sizeof(uint32_t) * MAX_ELEMENT_COUNT);
   assert(b1 != NULL);
-  b2 = malloc(sizeof(uint32_t) * MAX_ELEMENT_COUNT);
+  b2 = (uint32_t*)malloc(sizeof(uint32_t) * MAX_ELEMENT_COUNT);
   assert(b2 != NULL);
 
-  packed = malloc(sizeof(PackedArray) * 32);
+  packed = (PackedArray**)malloc(sizeof(PackedArray*) * 32);
   assert(packed != NULL);
   for (i = 0; i < 32; ++i)
     packed[i] = PackedArray_create(i + 1, MAX_ELEMENT_COUNT);
@@ -981,7 +981,7 @@ int main(void)
   for (i = 0; i < MAX_ELEMENT_COUNT; ++i)
     b1[i] = rand();
 
-  speed_memcpy = malloc(sizeof(double) * (LOG2_MAX_ELEMENT_COUNT + 1));
+  speed_memcpy = (double*)malloc(sizeof(double) * (LOG2_MAX_ELEMENT_COUNT + 1));
   assert(speed_memcpy != NULL);
   avg_memcpy = 0;
   min_memcpy = DBL_MAX;
@@ -1009,7 +1009,7 @@ int main(void)
   printf("%10.3f\t%10.3f\t%10.3f\n", avg_memcpy, min_memcpy, max_memcpy);
   printf("\n");
 
-  speed_loopcpy = malloc(sizeof(double) * (LOG2_MAX_ELEMENT_COUNT + 1));
+  speed_loopcpy = (double*)malloc(sizeof(double) * (LOG2_MAX_ELEMENT_COUNT + 1));
   assert(speed_loopcpy != NULL);
   avg_loopcpy = 0;
   min_loopcpy = DBL_MAX;
@@ -1054,9 +1054,9 @@ int main(void)
     printf("bits\tsize (B)\ttime (µs)\tspeed (B/µs)");
     printf("\n");
 
-    speed_pack[bitsPerItem - 1] = malloc(sizeof(double) * (LOG2_MAX_ELEMENT_COUNT + 1));
+    speed_pack[bitsPerItem - 1] = (double*)malloc(sizeof(double) * (LOG2_MAX_ELEMENT_COUNT + 1));
     assert(speed_pack[bitsPerItem - 1] != NULL);
-    speed_unpack[bitsPerItem - 1] = malloc(sizeof(double) * (LOG2_MAX_ELEMENT_COUNT + 1));
+    speed_unpack[bitsPerItem - 1] = (double*)malloc(sizeof(double) * (LOG2_MAX_ELEMENT_COUNT + 1));
     assert(speed_unpack[bitsPerItem - 1] != NULL);
     for (count = 1, i = 0; count <= MAX_ELEMENT_COUNT; count *= 2, ++i)
     {
