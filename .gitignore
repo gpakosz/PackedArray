@@ -1,0 +1,5 @@
+/bin
+PackedArray.pp.c
+PackedArray.cut.c
+PackedArraySIMD.pp.c
+PackedArraySIMD.cut.c
