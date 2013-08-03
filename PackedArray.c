@@ -863,7 +863,6 @@ int main(void)
 
 #include <stdio.h>
 #include <string.h>
-#include <sys/time.h>
 #include <float.h>
 
 #ifndef MIN
@@ -874,6 +873,24 @@ int main(void)
 #define MAX(x, y) (((x) < (y)) ? (y) : (x))
 #endif
 
+#ifdef _MSC_VER
+#pragma warning(push, 3)
+#include <windows.h>
+#pragma warning(pop)
+static double getChronometerTime(void)
+{
+  LARGE_INTEGER frequency;
+  LARGE_INTEGER t;
+
+  QueryPerformanceFrequency(&frequency);
+  QueryPerformanceCounter(&t);
+
+  return (double)t.QuadPart / (double)frequency.QuadPart * 1000;
+}
+
+#else
+#include <sys/time.h>
+
 static double getChronometerTime()
 {
   struct timeval now = { 0 };
@@ -881,6 +898,7 @@ static double getChronometerTime()
 
   return (double)now.tv_sec + (double)now.tv_usec * 1e-6;
 }
+#endif
 
 #define LOOP_COUNT 1000
 static double bench_memcpy(uint32_t* in, uint32_t* out, uint32_t count)
