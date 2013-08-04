@@ -1,5 +1,10 @@
 # PackedArray: random access array of tightly packed unsigned integers
 
+## TLDR
+
+*PackedArray comes to the rescue when you're in a desperate need for an uint9_t
+or uint17_t array.*
+
 ## What?
 
 When you want to hold an unordered sequence of unsigned integers into memory,
@@ -116,8 +121,8 @@ You write:
     PackedArray_set(a, j, value);
 
 The `PackedArray_computeBitsPerItem` helper scans a `uint32_t` array and returns
-the number of bits needed to create a `PackedArray` capable of holding the
-input.
+the number of bits needed to create a `PackedArray` capable of holding its
+content.
 
 There are also `PackedArray_pack` and `PackedArray_unpack` that operate on
 several items in a row. Those two could really have been named
