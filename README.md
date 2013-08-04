@@ -115,6 +115,10 @@ You write:
     ...
     PackedArray_set(a, j, value);
 
+The `PackedArray_computeBitsPerItem` helper scans a `uint32_t` array and returns
+the number of bits needed to create a `PackedArray` capable of holding the
+input.
+
 There are also `PackedArray_pack` and `PackedArray_unpack` that operate on
 several items in a row. Those two could really have been named
 `PackedArray_write` and `PackedArray_read` but I decided "pack" / "unpack"

@@ -59,8 +59,9 @@ void PackedArray_unpack(const PackedArray* a, const uint32_t offset, uint32_t* o
 void PackedArray_set(PackedArray* a, const uint32_t offset, const uint32_t in);
 uint32_t PackedArray_get(const PackedArray* a, const uint32_t offset);
 
-// serialization helpers
+// helpers
 uint32_t PackedArray_bufferSize(const PackedArray* a);
+uint32_t PackedArray_computeBitsPerItem(const uint32_t* in, uint32_t count);
 
 #ifdef __cplusplus
 }

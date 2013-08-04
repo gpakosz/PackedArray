@@ -575,6 +575,55 @@ uint32_t PackedArray_bufferSize(const PackedArray* a)
   return (uint32_t)(((uint64_t)a->bitsPerItem * (uint64_t)a->count + 31) / 32);
 }
 
+#if !(defined(_MSC_VER) && _MSC_VER >= 1400) || !defined(__GNUC__)
+// log base 2 of an integer, aka the position of the highest bit set
+static uint32_t __PackedArray_log2(uint32_t v)
+{
+  // references
+  // http://aggregate.org/MAGIC
+  // http://graphics.stanford.edu/~seander/bithacks.html
+
+  static const uint32_t multiplyDeBruijnBitPosition[32] =
+  {
+    0, 9, 1, 10, 13, 21, 2, 29, 11, 14, 16, 18, 22, 25, 3, 30,
+    8, 12, 20, 28, 15, 17, 24, 7, 19, 27, 23, 6, 26, 5, 4, 31
+  };
+
+  v |= v >> 1;
+  v |= v >> 2;
+  v |= v >> 4;
+  v |= v >> 8;
+  v |= v >> 16;
+
+  return multiplyDeBruijnBitPosition[(uint32_t)(v * 0x7C4ACDDU) >> 27];
+}
+#endif
+
+// position of the highest bit set
+static int __PackedArray_highestBitSet(uint32_t v)
+{
+#if defined(_MSC_VER) && _MSC_VER >= 1400
+  unsigned long index;
+  return _BitScanReverse(&index, v) ? index : -1;
+#elif defined(__GNUC__)
+  return v == 0 ? -1 : 31 - __builtin_clz(v);
+#else
+  return v != 0 ? __PackedArray_log2(v) : -1;
+#endif
+}
+
+uint32_t PackedArray_computeBitsPerItem(const uint32_t* in, uint32_t count)
+{
+  uint32_t i, in_max, bitsPerItem;
+
+  in_max = 0;
+  for (i = 0; i < count; ++i)
+    in_max = in[i] > in_max ? in[i] : in_max;
+
+  bitsPerItem = __PackedArray_highestBitSet(in_max) + 1;
+  return bitsPerItem == 0 ? 1 : bitsPerItem;
+}
+
 
 // - 8< ------------------------------------------------------------------------
 
@@ -832,6 +881,8 @@ int main(void)
       for (i = 0; i < count; ++i)
         v1[i] = rand() & mask;
 
+      assert(bitsPerItem >= PackedArray_computeBitsPerItem(v1, count));
+
       for (i = 0; i < count; ++i)
       {
         for (j = 1; j <= count - i; ++j)
@@ -841,6 +892,7 @@ int main(void)
           assert(memcmp(a1->buffer, a2->buffer, sizeof(a1->buffer[0]) * PackedArray_bufferSize(a1)) == 0);
 
           PackedArray_unpack(a1, i, v2, j);
+          assert(bitsPerItem >= PackedArray_computeBitsPerItem(v2, j));
           assert(memcmp(v1, v2, j * sizeof(uint32_t)) == 0);
           PackedArray_unpack_reference(a2, i, v2, j);
           assert(memcmp(v1, v2, j * sizeof(uint32_t)) == 0);
