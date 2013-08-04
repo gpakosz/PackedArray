@@ -584,6 +584,9 @@ uint32_t PackedArray_bufferSize(const PackedArray* a)
 
 #if defined(PACKEDARRAY_SELF_TEST)
 
+#undef NDEBUG // we want asserts
+#include <assert.h>
+
 #include <stdio.h>
 #include <string.h> // memcmp
 
