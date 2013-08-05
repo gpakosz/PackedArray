@@ -18,11 +18,11 @@ define _generate_rules
 build: build-$(1)
 build-$(1): $$(bindir)/$(1)SelfTest $$(bindir)/$(1)SelfBench
 
-$$(bindir)/$(1)SelfTest: $$(srcdir)/$(1).c
+$$(bindir)/$(1)SelfTest: $$(srcdir)/$(1).c $$(srcdir)/PackedArray.h
 	mkdir -p $$(@D)
 	$$(CC) -o $$@ -DPACKEDARRAY_SELF_TEST -std=c99 -pedantic $$(CFLAGS) $$<
 
-$$(bindir)/$(1)SelfBench: $$(srcdir)/$(1).c
+$$(bindir)/$(1)SelfBench: $$(srcdir)/$(1).c $$(srcdir)/PackedArray.h
 	mkdir -p $$(@D)
 	$$(CC) -o $$@ -DPACKEDARRAY_SELF_BENCH -DNDEBUG -std=c99 -pedantic $$(CFLAGS) $$<
 
