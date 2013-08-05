@@ -256,8 +256,9 @@ This produces the `PackedArray.pp.c` and `PackedArraySIMD.pp.c` files.
 --------------------------------------------------------------------------------
 
 If you find `PackedArray` or `PackedArraySIMD` useful and decide to use it in
-your own projects please drop me a line @gpakosz.
+your own projects please drop me a line [@gpakosz].
 
 If you use it in a commercial project, consider using [Gittip].
 
+[@gpakosz]: https://twitter.com/gpakosz
 [Gittip]: https://www.gittip.com/gpakosz/
