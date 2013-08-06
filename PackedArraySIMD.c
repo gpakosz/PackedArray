@@ -1321,7 +1321,8 @@ int main(void)
 
       printf("\n");
     }
-    assert(i == LOG2_MAX_ELEMENT_COUNT);
+    printf("%d\n",i);
+    assert(i == LOG2_MAX_ELEMENT_COUNT + 1);
 
     printf("avg (B/µs)\tmin (B/µs)\tmax (B/µs)");
     printf("\t\t");
@@ -1374,7 +1375,7 @@ int main(void)
       min_unpack = MIN(min_unpack, speed);
       max_unpack = MAX(max_unpack, speed);
     }
-    assert(i == LOG2_MAX_ELEMENT_COUNT);
+    assert(i == LOG2_MAX_ELEMENT_COUNT + 1);
 
     printf("%4d\t", bitsPerItem);
 
