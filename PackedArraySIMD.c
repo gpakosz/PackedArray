@@ -132,7 +132,7 @@
       case PACKEDARRAY_IMPL_CASE_I:
 #if (PACKEDARRAY_IMPL_BITS_PER_ITEM <= PACKEDARRAY_IMPL_BITS_AVAILABLE)
         in_4 = PackedArray_load_uint32x4(in);
-        packed = PackedArray_or_uint32x4(packed, PackedArray_shl_uint32x4(in_4, PACKEDARRAY_IMPL_START_BIT));
+        packed = PackedArray_vsli0_uint32x4(packed, in_4, PACKEDARRAY_IMPL_START_BIT);
         in += 4;
 #if (PACKEDARRAY_IMPL_BITS_PER_ITEM == PACKEDARRAY_IMPL_BITS_AVAILABLE)
         PackedArray_store_uint32x4(out, packed);
@@ -141,7 +141,7 @@
 #endif
 #else
         in_4 = PackedArray_load_uint32x4(in);
-        packed = PackedArray_or_uint32x4(packed, PackedArray_shl_uint32x4(in_4, PACKEDARRAY_IMPL_START_BIT));
+        packed = PackedArray_vsli0_uint32x4(packed, in_4, PACKEDARRAY_IMPL_START_BIT);
         PackedArray_store_uint32x4(out, packed);
         out += 4;
         packed = PackedArray_shr_uint32x4(in_4, PACKEDARRAY_IMPL_BITS_AVAILABLE);
@@ -174,17 +174,13 @@
         packed = PackedArray_load_uint32x4(in);
 #endif
 #else
-        {
-          PackedArray_uint32x4_t low, high;
-          low = PackedArray_shr_uint32x4(packed, PACKEDARRAY_IMPL_START_BIT);
-          in += 4;
-          packed = PackedArray_load_uint32x4(in);
-          high = PackedArray_shl_uint32x4(packed, PACKEDARRAY_IMPL_BITS_AVAILABLE);
-
-          out_4 = PackedArray_and_uint32x4(PackedArray_or_uint32x4(low, high), PackedArray_set_uint32x4(PACKEDARRAY_IMPL_MASK));
-          PackedArray_store_uint32x4(out, out_4);
-          out += 4;
-        }
+        out_4 = PackedArray_shr_uint32x4(packed, PACKEDARRAY_IMPL_START_BIT);
+        in += 4;
+        packed = PackedArray_load_uint32x4(in);
+        out_4 = PackedArray_vsli0_uint32x4(out_4, packed, PACKEDARRAY_IMPL_BITS_AVAILABLE);
+        out_4 = PackedArray_and_uint32x4(out_4, PackedArray_set_uint32x4(PACKEDARRAY_IMPL_MASK));
+        PackedArray_store_uint32x4(out, out_4);
+        out += 4;
         PACKEDARRAY_IMPL_UNPACK_CASE_BREAK
 #endif
 
@@ -458,33 +454,37 @@ static void __PackedArray_unpack_scalar(const uint32_t* buffer, const uint32_t b
 
 #include <emmintrin.h>
 
-#define PackedArray_uint32x4_t                __m128i
-#define PackedArray_uint32x4_zero             _mm_setzero_si128()
-#define PackedArray_set_uint32x4(i)           _mm_set1_epi32(i)
-#define PackedArray_sub_uint32x4(lhs, rhs)    _mm_sub_epi32(lhs, rhs)
-#define PackedArray_load_uint32x4(ptr)        _mm_loadu_si128((const __m128i*)ptr)
-#define PackedArray_store_uint32x4(ptr, v)    _mm_storeu_si128((__m128i*)ptr, v)
-#define PackedArray_shl_uint32x4(v, shift)    _mm_slli_epi32(v, shift)
-#define PackedArray_shr_uint32x4(v, shift)    _mm_srli_epi32(v, shift)
-#define PackedArray_or_uint32x4(lhs, rhs)     _mm_or_si128(lhs, rhs)
-#define PackedArray_and_uint32x4(lhs, rhs)    _mm_and_si128(lhs, rhs)
-#define PackedArray_andnot_uint32x4(lhs, rhs) _mm_andnot_si128(rhs, lhs)
+#define PackedArray_uint32x4_t                      __m128i
+#define PackedArray_uint32x4_zero                   _mm_setzero_si128()
+#define PackedArray_set_uint32x4(i)                 _mm_set1_epi32(i)
+#define PackedArray_sub_uint32x4(lhs, rhs)          _mm_sub_epi32(lhs, rhs)
+#define PackedArray_load_uint32x4(ptr)              _mm_loadu_si128((const __m128i*)ptr)
+#define PackedArray_store_uint32x4(ptr, v)          _mm_storeu_si128((__m128i*)ptr, v)
+#define PackedArray_shl_uint32x4(v, shift)          _mm_slli_epi32(v, shift)
+#define PackedArray_shr_uint32x4(v, shift)          _mm_srli_epi32(v, shift)
+#define PackedArray_or_uint32x4(lhs, rhs)           _mm_or_si128(lhs, rhs)
+#define PackedArray_and_uint32x4(lhs, rhs)          _mm_and_si128(lhs, rhs)
+#define PackedArray_andnot_uint32x4(lhs, rhs)       _mm_andnot_si128(rhs, lhs)
+// assumes dst bits are cleared at inserted bit positions
+#define PackedArray_vsli0_uint32x4(dst, src, shift) PackedArray_or_uint32x4(dst, PackedArray_shl_uint32x4(src, shift))
 
 #elif defined(__ARM_NEON__) || defined(_M_ARM)
 
 #include <arm_neon.h>
 
-#define PackedArray_uint32x4_t                uint32x4_t
-#define PackedArray_uint32x4_zero             vdupq_n_u32(0)
-#define PackedArray_set_uint32x4(i)           vdupq_n_u32(i)
-#define PackedArray_sub_uint32x4(lhs, rhs)    vsubq_u32(lhs, rhs)
-#define PackedArray_load_uint32x4(ptr)        vld1q_u32((const uint32_t*)ptr)
-#define PackedArray_store_uint32x4(ptr, v)    vst1q_u32(ptr, v)
-#define PackedArray_shl_uint32x4(v, shift)    vshlq_u32(v, vdupq_n_s32(shift))
-#define PackedArray_shr_uint32x4(v, shift)    vshlq_u32(v, vdupq_n_s32(-shift))
-#define PackedArray_or_uint32x4(lhs, rhs)     vorrq_u32(lhs, rhs)
-#define PackedArray_and_uint32x4(lhs, rhs)    vandq_u32(lhs, rhs)
-#define PackedArray_andnot_uint32x4(lhs, rhs) vandq_u32(lhs, vmvnq_u32(rhs))
+#define PackedArray_uint32x4_t                      uint32x4_t
+#define PackedArray_uint32x4_zero                   vdupq_n_u32(0)
+#define PackedArray_set_uint32x4(i)                 vdupq_n_u32(i)
+#define PackedArray_sub_uint32x4(lhs, rhs)          vsubq_u32(lhs, rhs)
+#define PackedArray_load_uint32x4(ptr)              vld1q_u32((const uint32_t*)ptr)
+#define PackedArray_store_uint32x4(ptr, v)          vst1q_u32(ptr, v)
+#define PackedArray_shl_uint32x4(v, shift)          vshlq_u32(v, vdupq_n_s32(shift))
+#define PackedArray_shr_uint32x4(v, shift)          vshlq_u32(v, vdupq_n_s32(-shift))
+#define PackedArray_or_uint32x4(lhs, rhs)           vorrq_u32(lhs, rhs)
+#define PackedArray_and_uint32x4(lhs, rhs)          vandq_u32(lhs, rhs)
+#define PackedArray_andnot_uint32x4(lhs, rhs)       vbicq_u32(lhs, rhs)
+// assumes dst bits are cleared at inserted bit positions
+#define PackedArray_vsli0_uint32x4(dst, src, shift) vsliq_n_u32(dst, src, shift)
 
 #else
 

@@ -184,7 +184,7 @@ There is a GNU Make 3.81 `MakeFile` in the `_gnu-make/` folder:
 See above if you want to compile from command line. Otherwise there is an Xcode
 project located in the `_mac-xcode/` folder.
 
-### Compiling for iOs
+### Compiling for iOS
 
 There is an Xcode project located in the `_ios-xcode/` folder.
 
