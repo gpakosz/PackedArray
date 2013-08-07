@@ -1,4 +1,4 @@
-.PHONY: build test preprocess cut clean
+.PHONY: build test preprocess cut assembly clean
 
 # directories
 ifeq ($(realpath .),)
@@ -25,6 +25,20 @@ $$(bindir)/$(1)SelfTest: $$(srcdir)/$(1).c $$(srcdir)/PackedArray.h
 $$(bindir)/$(1)SelfBench: $$(srcdir)/$(1).c $$(srcdir)/PackedArray.h
 	mkdir -p $$(@D)
 	$$(CC) -o $$@ -DPACKEDARRAY_SELF_BENCH -DNDEBUG -std=c99 -pedantic $$(CFLAGS) $$<
+
+.PHONY: assembly-$(1)
+assembly: assembly-$(1)
+assembly-$(1): $$(bindir)/$(1)SelfTest.s $$(bindir)/$(1)SelfBench.s
+
+$$(bindir)/$(1)SelfTest.s: $$(srcdir)/$(1).c $$(srcdir)/PackedArray.h
+	@echo Generating $$(@F) assembly listing
+	@mkdir -p $$(@D)
+	@$$(CC) -o $$@ -S -fverbose-asm -g -DPACKEDARRAY_SELF_TEST -std=c99 -pedantic $$(CFLAGS) $$<
+
+$$(bindir)/$(1)SelfBench.s: $$(srcdir)/$(1).c $$(srcdir)/PackedArray.h
+	@echo Generating $$(@F) assembly listing
+	@mkdir -p $$(@D)
+	@$$(CC) -o $$@ -S -fverbose-asm -g -DPACKEDARRAY_SELF_BENCH -DNDEBUG -std=c99 -pedantic $$(CFLAGS) $$<
 
 .PHONY: test-$(1)
 test : test-$(1)
