@@ -193,15 +193,19 @@ through SSH, launch one of the following from your terminal prompt.
 
     $ mkdir -p bin/ios
     $ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk -arch armv7 -o bin/ios/PackedArraySelfTest -DPACKEDARRAY_SELF_TEST -DNDEBUG -O2 PackedArray.c
+    $ codesign -s "iPhone Developer" ./bin/ios/PackedArraySelfTest
 
     $ mkdir -p bin/ios
     $ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk -arch armv7 -o bin/ios/PackedArraySelfBench -DPACKEDARRAY_SELF_BENCH -DNDEBUG -O2 PackedArray.c
+    $ codesign -s "iPhone Developer" ./bin/ios/PackedArraySelfBench
 
     $ mkdir -p bin/ios
     $ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk -arch armv7 -o bin/ios/PackedArraySIMDSelfTest -DPACKEDARRAY_SELF_TEST -DNDEBUG -O2 PackedArraySIMD.c
+    $ codesign -s "iPhone Developer" ./bin/ios/PackedArraySIMDSelfTest
 
     $ mkdir -p bin/ios
     $ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk -arch armv7 -o bin/ios/PackedArraySIMDSelfBench -DPACKEDARRAY_SELF_BENCH -DNDEBUG -O2 PackedArraySIMD.c
+    $ codesign -s "iPhone Developer" ./bin/ios/PackedArraySIMDSelfBench
 
 ### Compiling for Android
 
