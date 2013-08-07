@@ -175,14 +175,13 @@
 #endif
 #else
         {
-          PackedArray_uint32x4_t low, high, mask;
+          PackedArray_uint32x4_t low, high;
           low = PackedArray_shr_uint32x4(packed, PACKEDARRAY_IMPL_START_BIT);
           in += 4;
           packed = PackedArray_load_uint32x4(in);
           high = PackedArray_shl_uint32x4(packed, PACKEDARRAY_IMPL_BITS_AVAILABLE);
 
-          mask = PackedArray_shl_uint32x4(PackedArray_shr_uint32x4(PackedArray_set_uint32x4(PACKEDARRAY_IMPL_MASK), PACKEDARRAY_IMPL_BITS_AVAILABLE), PACKEDARRAY_IMPL_BITS_AVAILABLE);
-          out_4 = PackedArray_or_uint32x4(low, PackedArray_and_uint32x4(PackedArray_or_uint32x4(low, high), mask));
+          out_4 = PackedArray_and_uint32x4(PackedArray_or_uint32x4(low, high), PackedArray_set_uint32x4(PACKEDARRAY_IMPL_MASK));
           PackedArray_store_uint32x4(out, out_4);
           out += 4;
         }
@@ -376,7 +375,7 @@ void PACKEDARRAY_JOIN(__PackedArray_unpack_, PACKEDARRAY_IMPL_BITS_PER_ITEM)(con
 
 #include <stddef.h>
 
-static void __PackedArray_pack_scalar(uint32_t* buffer, uint32_t bitsPerItem, uint32_t mask, uint32_t offset, const uint32_t* in, uint32_t count)
+static void __PackedArray_pack_scalar(uint32_t* buffer, const uint32_t bitsPerItem, const uint32_t mask, uint32_t offset, const uint32_t* in, uint32_t count)
 {
   uint32_t* __restrict out;
   uint32_t startBit;
@@ -416,7 +415,7 @@ static void __PackedArray_pack_scalar(uint32_t* buffer, uint32_t bitsPerItem, ui
   }
 }
 
-static void __PackedArray_unpack_scalar(const uint32_t* buffer, uint32_t bitsPerItem, uint32_t mask, uint32_t offset, uint32_t* out, uint32_t count)
+static void __PackedArray_unpack_scalar(const uint32_t* buffer, const uint32_t bitsPerItem, const uint32_t mask, uint32_t offset, uint32_t* out, uint32_t count)
 {
   const uint32_t* __restrict in;
   uint32_t startBit;
@@ -447,7 +446,7 @@ static void __PackedArray_unpack_scalar(const uint32_t* buffer, uint32_t bitsPer
       low = in[0] >> startBit;
       high = in[4] << bitsAvailable;
 
-      value = low ^ ((low ^ high) & (mask >> bitsAvailable << bitsAvailable));
+      value = (low | high) & mask;
     }
     *out++ = value;
   }

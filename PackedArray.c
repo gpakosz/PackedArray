@@ -173,7 +173,8 @@
           low = packed >> PACKEDARRAY_IMPL_START_BIT;
           packed = *++in;
           high = packed << PACKEDARRAY_IMPL_BITS_AVAILABLE;
-          *out++ = low ^ ((low ^ high) & (PACKEDARRAY_IMPL_MASK >> PACKEDARRAY_IMPL_BITS_AVAILABLE << PACKEDARRAY_IMPL_BITS_AVAILABLE));
+
+          *out++ = (low | high) & PACKEDARRAY_IMPL_MASK;
         }
         PACKEDARRAY_IMPL_UNPACK_CASE_BREAK
 #endif
