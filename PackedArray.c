@@ -651,6 +651,7 @@ static void PackedArray_pack_reference(PackedArray* a, const uint32_t offset, co
 
   assert(a != NULL);
   assert(in != NULL);
+  assert(count != 0);
 
   bitsPerItem = a->bitsPerItem;
 
@@ -721,6 +722,7 @@ static void PackedArray_unpack_reference(const PackedArray* a, const uint32_t of
 
   assert(a != NULL);
   assert(out != NULL);
+  assert(count != 0);
 
   bitsPerItem = a->bitsPerItem;
 

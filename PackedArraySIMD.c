@@ -383,6 +383,7 @@ static void __PackedArray_pack_scalar(uint32_t* buffer, const uint32_t bitsPerIt
 
   PACKEDARRAY_ASSERT(buffer != NULL);
   PACKEDARRAY_ASSERT(in != NULL);
+  PACKEDARRAY_ASSERT(count != 0);
 
   while (count--)
   {
@@ -423,6 +424,7 @@ static void __PackedArray_unpack_scalar(const uint32_t* buffer, const uint32_t b
 
   PACKEDARRAY_ASSERT(buffer != NULL);
   PACKEDARRAY_ASSERT(out != NULL);
+  PACKEDARRAY_ASSERT(count != 0);
 
   while (count--)
   {
