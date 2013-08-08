@@ -35,6 +35,8 @@ struct _PackedArray
 {
   uint32_t bitsPerItem;
   uint32_t count;
+
+  uint32_t padding[2];
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4200)

@@ -131,7 +131,7 @@
 
       case PACKEDARRAY_IMPL_CASE_I:
 #if (PACKEDARRAY_IMPL_BITS_PER_ITEM <= PACKEDARRAY_IMPL_BITS_AVAILABLE)
-        in_4 = PackedArray_load_uint32x4(in);
+        in_4 = PackedArray_loadu_uint32x4(in);
         packed = PackedArray_vsli0_uint32x4(packed, in_4, PACKEDARRAY_IMPL_START_BIT);
         in += 4;
 #if (PACKEDARRAY_IMPL_BITS_PER_ITEM == PACKEDARRAY_IMPL_BITS_AVAILABLE)
@@ -140,7 +140,7 @@
         packed = PackedArray_uint32x4_zero;
 #endif
 #else
-        in_4 = PackedArray_load_uint32x4(in);
+        in_4 = PackedArray_loadu_uint32x4(in);
         packed = PackedArray_vsli0_uint32x4(packed, in_4, PACKEDARRAY_IMPL_START_BIT);
         PackedArray_store_uint32x4(out, packed);
         out += 4;
@@ -166,7 +166,7 @@
       case PACKEDARRAY_IMPL_CASE_I:
 #if (PACKEDARRAY_IMPL_BITS_PER_ITEM <= PACKEDARRAY_IMPL_BITS_AVAILABLE)
         out_4 = PackedArray_and_uint32x4(PackedArray_shr_uint32x4(packed, PACKEDARRAY_IMPL_START_BIT), PackedArray_set_uint32x4(PACKEDARRAY_IMPL_MASK));
-        PackedArray_store_uint32x4(out, out_4);
+        PackedArray_storeu_uint32x4(out, out_4);
         out += 4;
         PACKEDARRAY_IMPL_UNPACK_CASE_BREAK
 #if (PACKEDARRAY_IMPL_CASE_I < 31) && (PACKEDARRAY_IMPL_BITS_PER_ITEM == PACKEDARRAY_IMPL_BITS_AVAILABLE)
@@ -179,7 +179,7 @@
         packed = PackedArray_load_uint32x4(in);
         out_4 = PackedArray_vsli0_uint32x4(out_4, packed, PACKEDARRAY_IMPL_BITS_AVAILABLE);
         out_4 = PackedArray_and_uint32x4(out_4, PackedArray_set_uint32x4(PACKEDARRAY_IMPL_MASK));
-        PackedArray_store_uint32x4(out, out_4);
+        PackedArray_storeu_uint32x4(out, out_4);
         out += 4;
         PACKEDARRAY_IMPL_UNPACK_CASE_BREAK
 #endif
@@ -268,7 +268,7 @@ void PACKEDARRAY_JOIN(__PackedArray_pack_, PACKEDARRAY_IMPL_BITS_PER_ITEM)(uint3
     PACKEDARRAY_ASSERT(in == end);
     if ((count / 4 * PACKEDARRAY_IMPL_BITS_PER_ITEM + startBit) % 32)
     {
-      in_4 = PackedArray_load_uint32x4(out);
+      in_4 = PackedArray_loadu_uint32x4(out);
       mask = PackedArray_sub_uint32x4(PackedArray_shl_uint32x4(PackedArray_set_uint32x4(1), ((count / 4 * PACKEDARRAY_IMPL_BITS_PER_ITEM + startBit - 1) % 32) + 1), PackedArray_set_uint32x4(1));
       in_4 = PackedArray_andnot_uint32x4(in_4, mask);
       packed = PackedArray_or_uint32x4(packed, in_4);
@@ -332,7 +332,7 @@ void PACKEDARRAY_JOIN(__PackedArray_unpack_, PACKEDARRAY_IMPL_BITS_PER_ITEM)(con
         goto PACKEDARRAY_JOIN(PACKEDARRAY_JOIN(__PackedArray_unpack_, PACKEDARRAY_IMPL_BITS_PER_ITEM), _post);
 
       in += 4;
-      packed = PackedArray_load_uint32x4(in);
+      packed = PackedArray_loadu_uint32x4(in);
       offset_4 = 0;
     }
 
@@ -458,8 +458,10 @@ static void __PackedArray_unpack_scalar(const uint32_t* buffer, const uint32_t b
 #define PackedArray_uint32x4_zero                   _mm_setzero_si128()
 #define PackedArray_set_uint32x4(i)                 _mm_set1_epi32(i)
 #define PackedArray_sub_uint32x4(lhs, rhs)          _mm_sub_epi32(lhs, rhs)
-#define PackedArray_load_uint32x4(ptr)              _mm_loadu_si128((const __m128i*)ptr)
-#define PackedArray_store_uint32x4(ptr, v)          _mm_storeu_si128((__m128i*)ptr, v)
+#define PackedArray_loadu_uint32x4(ptr)             _mm_loadu_si128((const __m128i*)ptr)
+#define PackedArray_storeu_uint32x4(ptr, v)         _mm_storeu_si128((__m128i*)ptr, v)
+#define PackedArray_load_uint32x4(ptr)              _mm_load_si128((const __m128i*)ptr)
+#define PackedArray_store_uint32x4(ptr, v)          _mm_store_si128((__m128i*)ptr, v)
 #define PackedArray_shl_uint32x4(v, shift)          _mm_slli_epi32(v, shift)
 #define PackedArray_shr_uint32x4(v, shift)          _mm_srli_epi32(v, shift)
 #define PackedArray_or_uint32x4(lhs, rhs)           _mm_or_si128(lhs, rhs)
@@ -476,8 +478,18 @@ static void __PackedArray_unpack_scalar(const uint32_t* buffer, const uint32_t b
 #define PackedArray_uint32x4_zero                   vdupq_n_u32(0)
 #define PackedArray_set_uint32x4(i)                 vdupq_n_u32(i)
 #define PackedArray_sub_uint32x4(lhs, rhs)          vsubq_u32(lhs, rhs)
+#define PackedArray_loadu_uint32x4(ptr)             vld1q_u32((const uint32_t*)ptr)
+#define PackedArray_storeu_uint32x4(ptr, v)         vst1q_u32(ptr, v)
+#if defined(__GNUC__)
+// because  __builtin_assume_aligned isn't always available...
+
+typedef uint32_t __attribute__((aligned(16)))       PackedArray_aligned_uint32_t;
+#define PackedArray_load_uint32x4(ptr)              vld1q_u32((const PackedArray_aligned_uint32_t*)ptr)
+#define PackedArray_store_uint32x4(ptr, v)          vst1q_u32((PackedArray_aligned_uint32_t*)ptr, v)
+#else
 #define PackedArray_load_uint32x4(ptr)              vld1q_u32((const uint32_t*)ptr)
 #define PackedArray_store_uint32x4(ptr, v)          vst1q_u32(ptr, v)
+#endif
 #define PackedArray_shl_uint32x4(v, shift)          vshlq_u32(v, vdupq_n_s32(shift))
 #define PackedArray_shr_uint32x4(v, shift)          vshlq_u32(v, vdupq_n_s32(-shift))
 #define PackedArray_or_uint32x4(lhs, rhs)           vorrq_u32(lhs, rhs)
@@ -560,16 +572,32 @@ static void __PackedArray_unpack_scalar(const uint32_t* buffer, const uint32_t b
 #undef PACKEDARRAY_IMPL
 
 
-#if !defined(PACKEDARRAY_MALLOC) || !defined(PACKEDARRAY_FREE)
+#if !defined(PACKEDARRAY_ALIGNED_MALLOC) || !defined(PACKEDARRAY_FREE)
 #include <stdlib.h>
 #endif
 
-#if !defined(PACKEDARRAY_MALLOC)
-#define PACKEDARRAY_MALLOC(size) malloc(size)
+#if !defined(PACKEDARRAY_ALIGNED_MALLOC)
+#if defined (_MSC_VER)
+#define PACKEDARRAY_ALIGNED_MALLOC(alignment, size) _aligned_malloc(size, alignment)
+#elif defined (ANDROID) || defined (__ANDROID__)
+#define PACKEDARRAY_ALIGNED_MALLOC(alignment, size) memalign(alignment, size)
+#else
+static void* __PackedArray_aligned_malloc(size_t alignment, size_t size)
+{
+  void* p = NULL;
+  posix_memalign(&p, alignment, size);
+  return p;
+}
+#define PACKEDARRAY_ALIGNED_MALLOC(alignment, size) __PackedArray_aligned_malloc(alignment, size)
+#endif
 #endif
 
 #if !defined(PACKEDARRAY_FREE)
+#if defined (_MSC_VER)
+#define PACKEDARRAY_FREE(p) _aligned_free(p)
+#else
 #define PACKEDARRAY_FREE(p) free(p)
+#endif
 #endif
 
 PackedArray* PackedArray_create(uint32_t bitsPerItem, uint32_t count)
@@ -582,7 +610,8 @@ PackedArray* PackedArray_create(uint32_t bitsPerItem, uint32_t count)
 
   bufferSize = sizeof(uint32_t) * (((uint64_t)count / 4 * (uint64_t)bitsPerItem + 31) / 32 * 4);
   bufferSize += count < 4 ? sizeof(uint32_t) * count : sizeof(uint32_t) * 4;
-  a = (PackedArray*)PACKEDARRAY_MALLOC(sizeof(PackedArray) + bufferSize);
+  a = (PackedArray*)PACKEDARRAY_ALIGNED_MALLOC(16, sizeof(PackedArray) + bufferSize);
+  PACKEDARRAY_ASSERT((uint64_t)a->buffer % 16 == 0);
 
   if (a != NULL)
   {

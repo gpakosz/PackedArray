@@ -148,10 +148,17 @@ In order to use `PackedArray` or `PackedArraySIMD` in your own project, you just
 have to bring in the two `PackedArray.h` and `PackedArray.c` (or
 `PackedArraySIMD.c`) files. It's that simple.
 
-You can customize behavior by defining the following macros:
+You can customize `PackedArray.c`'s behavior by defining the following macros:
 
 - `PACKEDARRAY_ASSERT`
 - `PACKEDARRAY_MALLOC`
+- `PACKEDARARY_FREE`
+
+You can customize `PackedArraySIMD.c`'s behavior by defining the following
+macros:
+
+- `PACKEDARRAY_ASSERT`
+- `PACKEDARRAY_ALIGNED_MALLOC`
 - `PACKEDARARY_FREE`
 
 `PackedArray.c` and `PackedArraySIMD.c` can compile themselves into either a
