@@ -53,7 +53,7 @@ preprocess-$(1): $$(srcdir)/$(1).c
 	@sed -E\
 		-e 's/#include (<|").+(>|")/pp(&)/'\
 		$$(srcdir)/$(1).c > $$(tmp)
-	@$$(CPP) $$(CPPFLAGS) -DPACKEDARRAY_SELF=__FILE__ -xc $$(tmp) | sed -E\
+	@$$(CPP) $$(CPPFLAGS) -DPACKEDARRAY_SELF=__FILE__ $$(CFLAGS) -xc $$(tmp) | sed -E\
 		-e '/^# /d'\
 		-e 's/[ \t]*$$$$//'\
 		-e 's/pp\((.*)\)/\1/'\
