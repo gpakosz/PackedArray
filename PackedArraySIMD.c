@@ -129,25 +129,33 @@
 #define PACKEDARRAY_IMPL_PACK_CASE_BREAK
 #endif
 
-      case PACKEDARRAY_IMPL_CASE_I:
+        case PACKEDARRAY_IMPL_CASE_I:
 #if (PACKEDARRAY_IMPL_BITS_PER_ITEM <= PACKEDARRAY_IMPL_BITS_AVAILABLE)
-        in_4 = PackedArray_loadu_uint32x4(in);
-        packed = PackedArray_vsli0_uint32x4(packed, in_4, PACKEDARRAY_IMPL_START_BIT);
-        in += 4;
+#if defined(PACKEDARRAY_IMPL_ALIGNED)
+          in_4 = PackedArray_load_uint32x4(in);
+#else
+          in_4 = PackedArray_loadu_uint32x4(in);
+#endif
+          packed = PackedArray_vsli0_uint32x4(packed, in_4, PACKEDARRAY_IMPL_START_BIT);
+          in += 4;
 #if (PACKEDARRAY_IMPL_BITS_PER_ITEM == PACKEDARRAY_IMPL_BITS_AVAILABLE)
-        PackedArray_store_uint32x4(out, packed);
-        out += 4;
-        packed = PackedArray_uint32x4_zero;
+          PackedArray_store_uint32x4(out, packed);
+          out += 4;
+          packed = PackedArray_uint32x4_zero;
 #endif
 #else
-        in_4 = PackedArray_loadu_uint32x4(in);
-        packed = PackedArray_vsli0_uint32x4(packed, in_4, PACKEDARRAY_IMPL_START_BIT);
-        PackedArray_store_uint32x4(out, packed);
-        out += 4;
-        packed = PackedArray_shr_uint32x4(in_4, PACKEDARRAY_IMPL_BITS_AVAILABLE);
-        in += 4;
+#if defined(PACKEDARRAY_IMPL_ALIGNED)
+          in_4 = PackedArray_load_uint32x4(in);
+#else
+          in_4 = PackedArray_loadu_uint32x4(in);
 #endif
-        PACKEDARRAY_IMPL_PACK_CASE_BREAK
+          packed = PackedArray_vsli0_uint32x4(packed, in_4, PACKEDARRAY_IMPL_START_BIT);
+          PackedArray_store_uint32x4(out, packed);
+          out += 4;
+          packed = PackedArray_shr_uint32x4(in_4, PACKEDARRAY_IMPL_BITS_AVAILABLE);
+          in += 4;
+#endif
+          PACKEDARRAY_IMPL_PACK_CASE_BREAK
 
 #if PACKEDARRAY_IMPL_CASE_I < 31
 #include PACKEDARRAY_SELF
@@ -155,6 +163,7 @@
 #undef PACKEDARRAY_IMPL_CASE_I
 #undef PACKEDARRAY_IMPL_PACK_CASE_BREAK
 #undef PACKEDARRAY_IMPL_PACK_CASES
+#undef PACKEDARRAY_IMPL_ALIGNED
 #endif
 
 #elif defined(PACKEDARRAY_IMPL_UNPACK_CASES) // #if defined(PACKEDARRAY_IMPL_PACK_CASES)
@@ -163,25 +172,33 @@
 #define PACKEDARRAY_IMPL_UNPACK_CASE_BREAK
 #endif
 
-      case PACKEDARRAY_IMPL_CASE_I:
+        case PACKEDARRAY_IMPL_CASE_I:
 #if (PACKEDARRAY_IMPL_BITS_PER_ITEM <= PACKEDARRAY_IMPL_BITS_AVAILABLE)
-        out_4 = PackedArray_and_uint32x4(PackedArray_shr_uint32x4(packed, PACKEDARRAY_IMPL_START_BIT), PackedArray_set_uint32x4(PACKEDARRAY_IMPL_MASK));
-        PackedArray_storeu_uint32x4(out, out_4);
-        out += 4;
-        PACKEDARRAY_IMPL_UNPACK_CASE_BREAK
+          out_4 = PackedArray_and_uint32x4(PackedArray_shr_uint32x4(packed, PACKEDARRAY_IMPL_START_BIT), PackedArray_set_uint32x4(PACKEDARRAY_IMPL_MASK));
+#if defined(PACKEDARRAY_IMPL_ALIGNED)
+          PackedArray_store_uint32x4(out, out_4);
+#else
+          PackedArray_storeu_uint32x4(out, out_4);
+#endif
+          out += 4;
+          PACKEDARRAY_IMPL_UNPACK_CASE_BREAK
 #if (PACKEDARRAY_IMPL_CASE_I < 31) && (PACKEDARRAY_IMPL_BITS_PER_ITEM == PACKEDARRAY_IMPL_BITS_AVAILABLE)
-        in += 4;
-        packed = PackedArray_load_uint32x4(in);
+          in += 4;
+          packed = PackedArray_load_uint32x4(in);
 #endif
 #else
-        out_4 = PackedArray_shr_uint32x4(packed, PACKEDARRAY_IMPL_START_BIT);
-        in += 4;
-        packed = PackedArray_load_uint32x4(in);
-        out_4 = PackedArray_vsli0_uint32x4(out_4, packed, PACKEDARRAY_IMPL_BITS_AVAILABLE);
-        out_4 = PackedArray_and_uint32x4(out_4, PackedArray_set_uint32x4(PACKEDARRAY_IMPL_MASK));
-        PackedArray_storeu_uint32x4(out, out_4);
-        out += 4;
-        PACKEDARRAY_IMPL_UNPACK_CASE_BREAK
+          out_4 = PackedArray_shr_uint32x4(packed, PACKEDARRAY_IMPL_START_BIT);
+          in += 4;
+          packed = PackedArray_load_uint32x4(in);
+          out_4 = PackedArray_vsli0_uint32x4(out_4, packed, PACKEDARRAY_IMPL_BITS_AVAILABLE);
+          out_4 = PackedArray_and_uint32x4(out_4, PackedArray_set_uint32x4(PACKEDARRAY_IMPL_MASK));
+#if defined(PACKEDARRAY_IMPL_ALIGNED)
+          PackedArray_store_uint32x4(out, out_4);
+#else
+          PackedArray_storeu_uint32x4(out, out_4);
+#endif
+          out += 4;
+          PACKEDARRAY_IMPL_UNPACK_CASE_BREAK
 #endif
 
 #if PACKEDARRAY_IMPL_CASE_I < 31
@@ -190,6 +207,7 @@
 #undef PACKEDARRAY_IMPL_CASE_I
 #undef PACKEDARRAY_IMPL_UNPACK_CASE_BREAK
 #undef PACKEDARRAY_IMPL_UNPACK_CASES
+#undef PACKEDARRAY_IMPL_ALIGNED
 #endif
 
 #endif // #elif defined(PACKEDARRAY_IMPL_UNPACK_CASES)
@@ -240,13 +258,29 @@ void PACKEDARRAY_JOIN(__PackedArray_pack_, PACKEDARRAY_IMPL_BITS_PER_ITEM)(uint3
 
       n = (count + offset_4) / 128;
       count -= 128 * n - offset_4;
-      switch (offset_4 / 4)
+
+      if ((size_t)in % 16 == 0)
       {
-        do
+        switch (offset_4 / 4)
         {
+          do
+          {
+#define PACKEDARRAY_IMPL_PACK_CASES
+#define PACKEDARRAY_IMPL_ALIGNED
+#include PACKEDARRAY_SELF
+          } while (--n > 0);
+        }
+      }
+      else
+      {
+        switch (offset_4 / 4)
+        {
+          do
+          {
 #define PACKEDARRAY_IMPL_PACK_CASES
 #include PACKEDARRAY_SELF
-        } while (--n > 0);
+          } while (--n > 0);
+        }
       }
 
       if (count == 0)
@@ -317,15 +351,32 @@ void PACKEDARRAY_JOIN(__PackedArray_unpack_, PACKEDARRAY_IMPL_BITS_PER_ITEM)(con
 
       n = (count + offset_4) / 128;
       count -= 128 * n - offset_4;
-      switch (offset_4 / 4)
+      if ((size_t)out % 16 == 0)
       {
-        do
+        switch (offset_4 / 4)
         {
-          in += 4;
-          packed = PackedArray_load_uint32x4(in);
+          do
+          {
+            in += 4;
+            packed = PackedArray_load_uint32x4(in);
+#define PACKEDARRAY_IMPL_UNPACK_CASES
+#define PACKEDARRAY_IMPL_ALIGNED
+#include PACKEDARRAY_SELF
+          } while (--n > 0);
+        }
+      }
+      else
+      {
+        switch (offset_4 / 4)
+        {
+          do
+          {
+            in += 4;
+            packed = PackedArray_load_uint32x4(in);
 #define PACKEDARRAY_IMPL_UNPACK_CASES
 #include PACKEDARRAY_SELF
-        } while (--n > 0);
+          } while (--n > 0);
+        }
       }
 
       if (count == 0)
