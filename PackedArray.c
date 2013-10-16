@@ -1028,6 +1028,7 @@ static double bench_unpack(PackedArray* in, uint32_t* out, uint32_t count)
 #define LOG2_MAX_ELEMENT_COUNT 18
 int main(void)
 {
+  double start, end;
   uint32_t* b1;
   uint32_t* b2;
   uint32_t count, bitsPerItem;
@@ -1043,6 +1044,8 @@ int main(void)
   double avg_unpack, min_unpack, max_unpack;
 
   printf("-- PackedArray self bench ------------------------------------------------------\n");
+
+  start = getChronometerTime();
 
   b1 = (uint32_t*)malloc(sizeof(uint32_t) * MAX_ELEMENT_COUNT);
   assert(b1 != NULL);
@@ -1295,6 +1298,10 @@ int main(void)
   }
 
   free(packed);
+
+  end = getChronometerTime();
+  printf("total time (s): %f\n", (end - start));
+  printf("\n");
 
   return 0;
 }
