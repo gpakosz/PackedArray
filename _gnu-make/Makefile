@@ -42,7 +42,7 @@ $$(bindir)/$(1)SelfBench.s: $$(srcdir)/$(1).c $$(srcdir)/PackedArray.h
 
 .PHONY: test-$(1)
 test : test-$(1)
-test-$(1): build-$(1)  
+test-$(1): build-$(1)
 	$$(bindir)/$(1)SelfTest
 
 .PHONY: preprocess-$(1)
