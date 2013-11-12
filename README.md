@@ -196,23 +196,9 @@ project located in the `_mac-xcode/` folder.
 There is an Xcode project located in the `_ios-xcode/` folder.
 
 If you prefer compiling from command line and deploying to a jailbroken device
-through SSH, launch one of the following from your terminal prompt.
+through SSH, use:
 
-    $ mkdir -p bin/ios
-    $ $(xcode-select --print-path)/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -isysroot $(xcodebuild -version -sdk | grep 'SDKs/iPhoneOS.*\.sdk' | cut -d' ' -f2 | sort -rn | head -1) -arch armv7 -o bin/ios/PackedArraySelfTest -DPACKEDARRAY_SELF_TEST -DNDEBUG -O2 PackedArray.c
-    $ codesign -s "iPhone Developer" ./bin/ios/PackedArraySelfTest
-
-    $ mkdir -p bin/ios
-    $ $(xcode-select --print-path)/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -isysroot $(xcodebuild -version -sdk | grep 'SDKs/iPhoneOS.*\.sdk' | cut -d' ' -f2 | sort -rn | head -1) -arch armv7 -o bin/ios/PackedArraySelfBench -DPACKEDARRAY_SELF_BENCH -DNDEBUG -O2 PackedArray.c
-    $ codesign -s "iPhone Developer" ./bin/ios/PackedArraySelfBench
-
-    $ mkdir -p bin/ios
-    $ $(xcode-select --print-path)/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -isysroot $(xcodebuild -version -sdk | grep 'SDKs/iPhoneOS.*\.sdk' | cut -d' ' -f2 | sort -rn | head -1) -arch armv7 -o bin/ios/PackedArraySIMDSelfTest -DPACKEDARRAY_SELF_TEST -DNDEBUG -O2 PackedArraySIMD.c
-    $ codesign -s "iPhone Developer" ./bin/ios/PackedArraySIMDSelfTest
-
-    $ mkdir -p bin/ios
-    $ $(xcode-select --print-path)/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -isysroot $(xcodebuild -version -sdk | grep 'SDKs/iPhoneOS.*\.sdk' | cut -d' ' -f2 | sort -rn | head -1) -arch armv7 -o bin/ios/PackedArraySIMDSelfBench -DPACKEDARRAY_SELF_BENCH -DNDEBUG -O2 PackedArraySIMD.c
-    $ codesign -s "iPhone Developer" ./bin/ios/PackedArraySIMDSelfBench
+    $ make -C _gnu-make/ binsubdir=ios CC="$(xcrun --sdk iphoneos --find clang) -isysroot $(xcrun --sdk iphoneos --show-sdk-path) -arch armv7 -arch armv7s -arch arm64" postbuild="codesign -s 'iPhone Developer'"
 
 ### Compiling for Android
 
