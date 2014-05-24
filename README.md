@@ -1,5 +1,5 @@
 # PackedArray: random access array of tightly packed unsigned integers
-
+[![Build Status](https://travis-ci.org/gpakosz/PackedArray.png?branch=master)](https://travis-ci.org/gpakosz/PackedArray)
 ## TLDR
 
 *PackedArray comes to the rescue when you're in a desperate need for an uint9_t

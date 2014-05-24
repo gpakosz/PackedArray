@@ -68,7 +68,7 @@ test-$(1): build-$(1)
 preprocess: preprocess-$(1)
 preprocess-$(1): $(srcdir)/$(1).c
 	@echo Preprocessing $(1).c to $(1).pp.c
-	$$(eval tmp := $$(shell mktemp -t $(1)))
+	$$(eval tmp := $$(shell mktemp -t $(1)XXX))
 	@sed -E\
 		-e 's/#include (<|").+(>|")/pp(&)/'\
 		$(srcdir)/$(1).c > $$(tmp)

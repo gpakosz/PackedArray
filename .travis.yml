@@ -1,0 +1,11 @@
+language: cpp
+compiler:
+  - clang
+  - gcc
+env:
+  - TARGET=build
+  - TARGET=test
+  - TARGET=preprocess
+  - TARGET=cut
+  - TARGET=assembly
+script: make -j -C ./_gnu-make $TARGET
