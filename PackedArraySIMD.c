@@ -1,3 +1,6 @@
+// see README.md for usage instructions.
+// (‑●‑●)> released under the WTFPL v2 license, by Gregory Pakosz (@gpakosz)
+
 #ifndef PACKEDARRAY_SELF
 #define PACKEDARRAY_SELF "PackedArraySIMD.c"
 #endif
