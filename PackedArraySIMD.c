@@ -808,7 +808,7 @@ uint32_t PackedArray_bufferSize(const PackedArray* a)
   return (uint32_t)bufferSize;
 }
 
-#if !(defined(_MSC_VER) && _MSC_VER >= 1400) || !defined(__GNUC__)
+#if !(defined(_MSC_VER) && _MSC_VER >= 1400) && !defined(__GNUC__)
 // log base 2 of an integer, aka the position of the highest bit set
 static uint32_t __PackedArray_log2(uint32_t v)
 {
