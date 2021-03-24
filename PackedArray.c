@@ -239,7 +239,7 @@ void PACKEDARRAY_JOIN(__PackedArray_pack_, PACKEDARRAY_IMPL_BITS_PER_ITEM)(uint3
   PACKEDARRAY_ASSERT(in == end);
   if ((count * PACKEDARRAY_IMPL_BITS_PER_ITEM + startBit) % 32)
   {
-    packed |= *out & ~((uint32_t)(1ULL << ((((uint64_t)count * (uint64_t)PACKEDARRAY_IMPL_BITS_PER_ITEM + startBit - 1) % 32) + 1)) - 1);
+    packed |= *out & ~((uint32_t)(1ULL << (((uint64_t)count * (uint64_t)PACKEDARRAY_IMPL_BITS_PER_ITEM + startBit) % 32)) - 1);
     *out = packed;
   }
 }
